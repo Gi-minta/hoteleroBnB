@@ -1,0 +1,22 @@
+{
+  "name": "hotelero",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "db:generate": "cd server && npx prisma generate",
+    "db:push": "cd server && npx prisma db push",
+    "db:seed": "cd server && npx tsx src/seed.ts",
+    "setup": "npm install && cd server && npm install && npx prisma generate && npx prisma db push && npx tsx src/seed.ts && cd ../client && npm install",
+    "test": "cd server && npm test && cd ../client && npm test",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  role      String    @default("admin")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Guest {
+  id              Int          @id @default(autoincrement())
+  nombre          String
+  apellido        String
+  tipoDocumento   String       @default("CC")
+  documento       String       @unique
+  email           String
+  telefono        String
+  profesion       String       @default("")
+  nacionalidad    String       @default("")
+  fechaNacimiento DateTime?
+  direccion       String       @default("")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  reservations    Reservation[]
+}
+
+model RoomType {
+  id             Int         @id @default(autoincrement())
+  nombre         String      @unique
+  descripcion    String      @default("")
+  precioBase     Float
+  capacidadMaxima Int        @default(2)
+  rooms          Room[]
+}
+
+model Room {
+  id                  Int              @id @default(autoincrement())
+  numero              String
+  roomTypeId          Int
+  precioPersonalizado Float?
+  estado              String           @default("Disponible")
+  piso                Int              @default(1)
+  notas               String           @default("")
+  roomType   RoomType         @relation(fields: [roomTypeId], references: [id])
+  reservations ReservationRoom[]
+  photos     RoomPhoto[]
+}
+
+model Reservation {
+  id                Int               @id @default(autoincrement())
+  guestId           Int
+  userId            Int?
+  responsablePagoId Int?
+  checkInDate       DateTime
+  checkOutDate      DateTime
+  status            String            @default("Pendiente")
+  totalAmount       Float
+  notas             String            @default("")
+  createdDate       DateTime          @default(now())
+  guest             Guest             @relation(fields: [guestId], references: [id])
+  responsablePago   ResponsablePago?  @relation(fields: [responsablePagoId], references: [id])
+  reservationRooms  ReservationRoom[]
+  payments          Payment[]
+}
+
+model ReservationRoom {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  roomId        Int
+  pricePerNight Float
+  nights        Int
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  room          Room        @relation(fields: [roomId], references: [id])
+}
+
+model Payment {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  amount        Float
+  method        String
+  paymentDate   DateTime    @default(now())
+  reference     String      @default("")
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+}
+
+model ResponsablePago {
+  id          Int           @id @default(autoincrement())
+  razonSocial String
+  cuit        String        @unique
+  posicionIva String        @default("ConsumidorFinal")
+  telefono    String        @default("")
+  email       String        @default("")
+  pais        String        @default("")
+  provincia   String        @default("")
+  ciudad      String        @default("")
+  calle       String        @default("")
+  fechaAlta   DateTime      @default(now())
+  reservations Reservation[]
+}
+
+model EscnnaChecklist {
+  id            Int      @id @default(autoincrement())
+  reservationId Int?
+  guestId       Int?
+  paso          Int
+  completado    Boolean  @default(false)
+  data          String   @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RoomPhoto {
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  url       String
+  caption   String   @default("")
+  orden     Int      @default(0)
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model LandingContent {
+  id        Int      @id @default(autoincrement())
+  section   String
+  key       String
+  value     String   @default("")
+  updatedAt DateTime @updatedAt
+
+  @@unique([section, key])
+}
+
+model LandingGallery {
+  id        Int      @id @default(autoincrement())
+  url       String
+  caption   String   @default("")
+  orden     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model RegistroHuesped {
+  id                  Int       @id @default(autoincrement())
+  // Datos de la reserva (opcionales: puede llenarse sin reserva previa)
+  numeroReserva       String    @default("")
+  numeroHabitacion    String    @default("")
+  fechaLlegada        DateTime?
+  fechaSalida         DateTime?
+  // Huésped principal
+  nombres             String
+  apellidos           String
+  tipoDocumento       String    @default("CC") // CC | CE | PA
+  numeroDocumento     String
+  fechaNacimiento     DateTime?
+  email               String
+  telefono            String
+  profesion           String    @default("")
+  origen              String    @default("")
+  // Acompañantes y documentos (JSON serializado, como EscnnaChecklist.data)
+  numeroPersonas      Int       @default(1)
+  acompanantes        String    @default("[]") // [{nombres, apellidos, tipoDocumento, numeroDocumento, esMenor, permisoUrl}]
+  documentosIdentidad String    @default("[]") // [{persona, url}]
+  // Consentimiento y aceptaciones
+  autorizaInfo        Boolean   @default(false)
+  aceptaReglamento    Boolean   @default(false)
+  aceptaEscnna        Boolean   @default(false)
+  aceptaContrato      Boolean   @default(false)
+  firmaUrl            String    @default("") // dataURL PNG de la firma
+  estado              String    @default("Pendiente") // Pendiente | Revisado | Aprobado | Rechazado
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model PreRegistro {
+  id            Int       @id @default(autoincrement())
+  nombre        String
+  apellido      String    @default("")
+  email         String
+  telefono      String
+  checkInDate   DateTime?
+  checkOutDate  DateTime?
+  personas      Int       @default(1)
+  mensaje       String    @default("")
+  estado        String    @default("Pendiente") // Pendiente | Contactado | Convertido | Descartado
+  origen        String    @default("Web")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

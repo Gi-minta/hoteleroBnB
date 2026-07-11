@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* El modo oscuro se maneja por la clase .dark en <html> (la togglea el botón y el
+   script inline de index.html), no por prefers-color-scheme. Sin esto, las utilidades
+   dark: de Tailwind v4 responden al SO y el modo oscuro queda "a parches". */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Work Sans", sans-serif;
+  --font-serif: "Fraunces", serif;
+  --font-mono: "Space Mono", monospace;
+  --color-wall: var(--color-wall, #FAF7F0);
+  --color-wall-2: var(--color-wall-2, #F1EBDD);
+  --color-ink: var(--color-ink, #1B2E22);
+  --color-ink-soft: var(--color-ink-soft, #4D5A51);
+  --color-verde: var(--color-verde, #3F6B4B);
+  --color-verde-2: var(--color-verde-2, #2F5540);
+  --color-fucsia: var(--color-fucsia, #D6336C);
+  --color-mostaza: var(--color-mostaza, #E8A73E);
+  --color-wa: var(--color-wa, #25D366);
+  --color-rojo: var(--color-rojo, #DB5461);
+  --color-gris: var(--color-gris, #686963);
+  --color-gris-azul: var(--color-gris-azul, #8AA29E);
+  --color-azul: var(--color-azul, #3D5467);
+  --color-hueso: var(--color-hueso, #F1EDEE);
+  --color-dark-bg: var(--color-dark-bg, #0F1A14);
+  --color-dark-surface: var(--color-dark-surface, #1A2E22);
+  --color-dark-card: var(--color-dark-card, #233A2B);
+  --color-dark-border: var(--color-dark-border, #2F4A38);
+}
+
+:root {
+  --color-wall: #FAF7F0;
+  --color-wall-2: #F1EBDD;
+  --color-ink: #1B2E22;
+  --color-ink-soft: #4D5A51;
+  --color-verde: #3F6B4B;
+  --color-verde-2: #2F5540;
+  --color-fucsia: #D6336C;
+  --color-mostaza: #E8A73E;
+  --color-wa: #25D366;
+  --color-rojo: #DB5461;
+  --color-gris: #686963;
+  --color-gris-azul: #8AA29E;
+  --color-azul: #3D5467;
+  --color-hueso: #F1EDEE;
+  --color-dark-bg: #0F1A14;
+  --color-dark-surface: #1A2E22;
+  --color-dark-card: #233A2B;
+  --color-dark-border: #2F4A38;
+}
+
+/* Landing pública (B&B): en modo oscuro la paleta se aclara tal cual el mockup
+   B&BMed.html. Se declara sobre el contenedor .bnb-landing para ganarle a los
+   estilos inline de la paleta (aplicados en :root por applyPalette) SIN usar
+   !important y sin afectar el panel admin. En modo claro no aplica, por lo que la
+   personalización de paleta del admin sigue funcionando en la landing. */
+.dark .bnb-landing {
+  --color-wall: #131C16;
+  --color-wall-2: #1A251D;
+  --color-ink: #ECF1EC;
+  --color-ink-soft: #A7B6AB;
+  --color-verde: #84BE9A;
+  --color-verde-2: #0E1712;
+  --color-fucsia: #EE7CA3;
+  --color-mostaza: #F0BC5E;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-wall);
+  color: var(--color-ink);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background: var(--color-dark-bg);
+  color: #E8EDE0;
+}
+
+.dark .bg-white {
+  background-color: var(--color-dark-card);
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--color-dark-surface);
+}
+
+.dark .border-\[--color-1B2E22\]\/10,
+.dark .border-\[--color-1B2E22\]\/5 {
+  border-color: var(--color-dark-border);
+}
+
+.dark .text-\[--color-4D5A51\] {
+  color: #A0B0A0;
+}
+
+.dark .text-\[--color-1B2E22\] {
+  color: #E8EDE0;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: var(--color-dark-surface);
+}
+
+.eyebrow {
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-verde);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--color-mostaza);
+  display: inline-block;
+}
+
+@keyframes drip {
+  0%, 100% { transform: translateY(-100%); }
+  50% { transform: translateY(100%); }
+}
+
+.animate-drip {
+  animation: drip 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-shadow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  50% { box-shadow: 0 0 0 16px rgba(37, 211, 102, 0); }
+}
+
+.animate-pulse-shadow {
+  animation: pulse-shadow 2s ease-in-out infinite;
+}
