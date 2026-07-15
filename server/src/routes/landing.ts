@@ -25,6 +25,45 @@ landing.get("/rooms-gallery", async (c) => {
   return c.json(rooms)
 })
 
+landing.get("/availability", async (c) => {
+  const month = Number(c.req.query("month")) || new Date().getMonth() + 1
+  const year = Number(c.req.query("year")) || new Date().getFullYear()
+  const start = new Date(year, month - 1, 1)
+  const end = new Date(year, month, 0, 23, 59, 59)
+
+  const rooms = await prisma.room.findMany({
+    include: { roomType: true },
+    orderBy: { numero: "asc" },
+  })
+
+  const reservationRooms = await prisma.reservationRoom.findMany({
+    where: {
+      reservation: {
+        status: { notIn: ["Cancelada"] },
+        checkInDate: { lt: end },
+        checkOutDate: { gt: start },
+      },
+    },
+    include: {
+      reservation: { select: { checkInDate: true, checkOutDate: true } },
+    },
+  })
+
+  const occupied: Record<number, string[]> = {}
+  for (const rr of reservationRooms) {
+    if (!occupied[rr.roomId]) occupied[rr.roomId] = []
+    const ci = new Date(rr.reservation.checkInDate)
+    const co = new Date(rr.reservation.checkOutDate)
+    const d = new Date(ci)
+    while (d < co) {
+      occupied[rr.roomId].push(d.toISOString().slice(0, 10))
+      d.setDate(d.getDate() + 1)
+    }
+  }
+
+  return c.json({ rooms, occupied, month, year })
+})
+
 // ── Pre-registro público (formulario de la landing, sin WhatsApp) ──
 landing.post("/pre-registro", async (c) => {
   const body = await c.req.json()

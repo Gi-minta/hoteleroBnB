@@ -3,6 +3,7 @@ import { useI18n } from "@/context/I18nContext"
 import { useLandingContent, useLandingGallery } from "@/api/queries/useLanding"
 import { useCreatePreRegistro } from "@/api/queries/usePreRegistros"
 import RegistroHuespedModal from "@/components/RegistroHuespedModal"
+import AvailabilityModal from "@/components/AvailabilityModal"
 
 const whatsapp = "https://wa.me/573004446421"
 
@@ -189,6 +190,7 @@ function Hero({ t }: { t: Translate }) {
 function ApartmentCard({ images, name, desc, tags, eyebrow }: { images: string[]; name: string; desc: string; tags: string[]; eyebrow?: string }) {
   const tr = useTr()
   const [idx, setIdx] = useState(0)
+  const [availOpen, setAvailOpen] = useState(false)
   return (
     <div className="bg-white dark:bg-[#1E2A22] rounded-2xl overflow-hidden shadow-xl shadow-black/5 border border-ink/5 dark:border-white/10 hover:-translate-y-1.5 hover:shadow-2xl transition duration-300">
       <div className="relative h-[270px] overflow-hidden">
@@ -216,12 +218,13 @@ function ApartmentCard({ images, name, desc, tags, eyebrow }: { images: string[]
             <span key={tag} className="text-xs px-3 py-1.5 rounded-full bg-verde/10 dark:bg-verde/12 text-verde dark:text-verde border border-ink/10 dark:border-white/10" style={{ fontFamily: "'Space Mono', monospace" }}>{tag}</span>
           ))}
         </div>
-        <a href={`${whatsapp}?text=Hola!%20Me%20interesa%20el%20${encodeURIComponent(name)}`} target="_blank" rel="noopener"
-          className="bg-verde text-white px-5 py-2.5 rounded-full text-sm font-bold inline-flex items-center gap-2 hover:bg-verde-2 transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.87 9.87 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Z" /></svg>
+        <button onClick={() => setAvailOpen(true)}
+          className="bg-verde text-white px-5 py-2.5 rounded-full text-sm font-bold inline-flex items-center gap-2 hover:bg-verde-2 transition cursor-pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
           {tr("Ver disponibilidad", "Check availability")}
-        </a>
+        </button>
       </div>
+      {availOpen && <AvailabilityModal roomTypeName={name} onClose={() => setAvailOpen(false)} />}
     </div>
   )
 }
@@ -294,17 +297,17 @@ function Location() {
   const tr = useTr()
   const places = [
     { name: "Unicentro", time: "0.2 km", icon: "🛍️", desc: tr("Centro comercial a media cuadra (2 min a pie)", "Shopping mall half a block away (2 min walk)"), img: "/images/unicentro.png" },
-    { name: "Pueblito Paisa", time: "1.9 km", icon: "🏘️", desc: tr("En el Cerro Nutibara, un pueblito tradicional con vistas panorámicas de la ciudad.", "On Cerro Nutibara, a traditional little town with panoramic views of the city."), img: "/images/pueblito-paisa.png" },
+    { name: "Pueblito Paisa", time: "2.0 km", icon: "🏘️", desc: tr("En el Cerro Nutibara, un pueblito tradicional con vistas panorámicas de la ciudad.", "On Cerro Nutibara, a traditional little town with panoramic views of the city."), img: "/images/pueblito-paisa.png" },
     { name: "Laureles", time: "1.4 km", icon: "🌳", desc: tr("Calles circulares, Avenida 70 y los dos parques de Laureles con cafés y restaurantes.", "Circular streets, Avenida 70 and the two Laureles parks with cafés and restaurants."), img: "/images/laureles.png" },
     { name: "Carrera 70", time: "1.4 km", icon: "🚶", desc: tr("Zona Rosa Laureles — bares y vida nocturna", "Laureles Zona Rosa — bars and nightlife"), img: "/images/carrera70.png" },
     { name: "Plaza Mayor", time: "2.9 km", icon: "🏛️", desc: tr("Centro de Convenciones y eventos de Medellín", "Medellín's Convention and events center"), img: "/images/plaza-mayor.png" },
-    { name: "Parques del Río", time: "1.2 km", icon: "🌿", desc: tr("Malecón junto al río Medellín, con zonas verdes, restaurantes y ciclorrutas.", "A riverfront promenade along the Medellín River, with green areas, restaurants and bike paths."), img: "/images/parques-del-rio.jpg" },
+    { name: "Parques del Río", time: "1.0 km", icon: "🌿", desc: tr("Malecón junto al río Medellín, con zonas verdes, restaurantes y ciclorrutas.", "A riverfront promenade along the Medellín River, with green areas, restaurants and bike paths."), img: "/images/parques-del-rio.jpg" },
     { name: "Universidad Pontificia Bolivariana", time: "0.5 km", icon: "🎓", desc: tr("El barrio Conquistadores se desarrolló alrededor de la Universidad Pontificia Bolivariana.", "The Conquistadores neighborhood grew up around Universidad Pontificia Bolivariana."), img: "/images/upb.jpg" },
-    { name: tr("Centro de Medellín", "Downtown Medellín"), time: "0.5 km", icon: "🎓", desc: tr("Centro administrativo y cultural de la ciudad.", "The city's administrative and cultural center."), img: "/images/centro-medellin.jpg" },
-    { name: "Plaza Botero", time: "3.5 km", icon: "🎓", desc: tr("Museo de Antioquia, Parque Berrio", "Antioquia Museum, Parque Berrío"), img: "/images/plaza-botero.png" },
+    { name: tr("Centro de Medellín", "Downtown Medellín"), time: "4.5 km", icon: "🏛️", desc: tr("Centro administrativo y cultural de la ciudad.", "The city's administrative and cultural center."), img: "/images/centro-medellin.jpg" },
+    { name: "Plaza Botero", time: "4.5 km", icon: "🎓", desc: tr("Museo de Antioquia, Parque Berrio", "Antioquia Museum, Parque Berrío"), img: "/images/plaza-botero.png" },
   ]
   return (
-    <section id="ubicacion" className="py-20 bg-[#F1EBDD] dark:bg-[#1A251D]">
+    <section id="alrededores" className="py-20 bg-[#F1EBDD] dark:bg-[#1A251D]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
           <p className="text-xs tracking-widest uppercase text-verde dark:text-verde flex items-center justify-center gap-2 font-bold" style={{ fontFamily: "'Space Mono', monospace" }}>
@@ -345,7 +348,7 @@ function Location() {
 function AddressMap() {
   const tr = useTr()
   return (
-    <section id="mapa" className="py-20">
+    <section id="ubicacion" className="py-20">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 items-stretch">
           <div className="bg-white dark:bg-[#1E2A22] border border-ink/10 dark:border-white/10 rounded-lg p-8 flex flex-col justify-center gap-5">
@@ -383,12 +386,69 @@ function AddressMap() {
 
 function Stats() {
   const tr = useTr()
-  const cards = [
-    { star: "★★★★★", label: tr("Excelente ubicación", "Great location") },
-    { star: "★★★★★", label: tr("Apartamento impecable", "Impeccable apartment") },
-    { star: "★★★★★", label: tr("Atención excepcional", "Exceptional service") },
-    { star: "★★★★★", label: tr("Muy recomendado", "Highly recommended") },
+  const reviews = [
+    {
+      name: "Carlos Mendoza",
+      origin: tr("Bogotá, Colombia", "Bogotá, Colombia"),
+      text: tr(
+        "Excelente atención de la señora Olga, siempre pendiente de que todo estuviera perfecto. La habitación muy limpia y cómoda. La ubicación es ideal, cerca a Unicentro y Laureles. Sin duda volveré.",
+        "Excellent service from Mrs. Olga, always making sure everything was perfect. The room was very clean and comfortable. The location is ideal, near Unicentro and Laureles. I will definitely return."
+      ),
+      rating: 5,
+      date: tr("Marzo 2026", "March 2026"),
+    },
+    {
+      name: "Ana Patricia Ruiz",
+      origin: tr("Cali, Colombia", "Cali, Colombia"),
+      text: tr(
+        "Me encantó la tranquilidad del lugar. La casa es amplia, con una terraza delantera hermosa. Pude traer a mi perro sin problema, algo que agradezco muchísimo. La cocina completamente equipada me permitió ahorrar en comidas.",
+        "I loved the tranquility of the place. The house is spacious with a beautiful front terrace. I could bring my dog without any issue, something I really appreciate. The fully equipped kitchen helped me save on meals."
+      ),
+      rating: 5,
+      date: tr("Febrero 2026", "February 2026"),
+    },
+    {
+      name: "John & Sarah Mitchell",
+      origin: tr("Nueva York, EE. UU.", "New York, USA"),
+      text: tr(
+        "Amazing hidden gem in Medellín! Olga was the most welcoming host. The apartment was spotless, the balcony views are stunning, and the neighborhood feels safe and vibrant. Walking distance to great restaurants and parks. Highly recommended!",
+        "¡Una joya escondida en Medellín! Olga fue la anfitriona más acogedora. El apartamento estaba impecable, las vistas desde el balcón son increíbles y el barrio es seguro y vibrante. ¡Altamente recomendado!"
+      ),
+      rating: 5,
+      date: tr("Enero 2026", "January 2026"),
+    },
+    {
+      name: "Laura Jiménez",
+      origin: tr("Medellín, Colombia", "Medellín, Colombia"),
+      text: tr(
+        "Tomé este hospedaje para recibir a mi familia que venía de visita. La atención fue tan cálida que se sintieron como en casa. Las habitaciones amplias y la limpieza impecable. El balcón del segundo piso es perfecto para compartir un café en las tardes.",
+        "I booked this place for my family visiting from out of town. The service was so warm they felt right at home. Spacious rooms and impeccable cleanliness. The second-floor balcony is perfect for sharing a coffee in the afternoons."
+      ),
+      rating: 5,
+      date: tr("Diciembre 2025", "December 2025"),
+    },
+    {
+      name: "Pedro Hernández",
+      origin: tr("Ciudad de México, México", "Mexico City, Mexico"),
+      text: tr(
+        "Viajé por negocios y encontré el equilibrio perfecto entre comodidad y precio. El WiFi de 100 MB funcionó excelente para mis videollamadas. La ubicación cerca a la UPB y Laureles me permitió moverme fácilmente por la ciudad.",
+        "I traveled for business and found the perfect balance between comfort and price. The 100 MB WiFi worked great for my video calls. The location near UPB and Laureles made it easy to get around the city."
+      ),
+      rating: 5,
+      date: tr("Noviembre 2025", "November 2025"),
+    },
+    {
+      name: "Valentina Gómez",
+      origin: tr("Buenos Aires, Argentina", "Buenos Aires, Argentina"),
+      text: tr(
+        "Todo impecable. La habitación privada con baño es muy cómoda y la casa familiar tiene un ambiente muy agradable. Olga nos dio recomendaciones locales increíbles que hicieron nuestro viaje mucho mejor. La relación calidad-precio es inmejorable.",
+        "Everything was impeccable. The private room with bathroom is very comfortable and the family home has a very pleasant atmosphere. Olga gave us incredible local recommendations that made our trip much better. The value for money is unbeatable."
+      ),
+      rating: 5,
+      date: tr("Octubre 2025", "October 2025"),
+    },
   ]
+
   return (
     <section className="py-20 bg-verde dark:bg-[#16241B] text-white">
       <div className="max-w-6xl mx-auto px-6">
@@ -397,13 +457,17 @@ function Stats() {
             <span className="w-5 h-0.5 bg-white" /> {tr("Opiniones", "Reviews")}
           </p>
           <h2 className="text-3xl md:text-4xl mt-3 text-white" style={{ fontFamily: "'Fraunces', serif" }}>{tr("Lo que dicen nuestros huéspedes", "What our guests say")}</h2>
-          <p className="text-white/80 text-sm mt-2">{tr("Más de 100 huéspedes nos han calificado con la máxima puntuación.", "Over 100 guests have given us the highest rating.")}</p>
+          <p className="text-white/80 text-sm mt-2">{tr("Más de 29 huéspedes nos han calificado con 5.0 estrellas en Google.", "Over 29 guests have rated us 5.0 stars on Google.")}</p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {cards.map((s) => (
-            <div key={s.label} className="bg-white/10 border border-white/20 rounded-xl p-6 text-center hover:bg-white/15 hover:-translate-y-1.5 transition">
-              <div className="text-mostaza tracking-wider text-lg mb-2">{s.star}</div>
-              <p className="font-bold text-sm">{s.label}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {reviews.map((r) => (
+            <div key={r.name} className="bg-white/10 border border-white/20 rounded-xl p-6 text-left hover:bg-white/15 hover:-translate-y-1.5 transition flex flex-col gap-3">
+              <div className="text-mostaza tracking-wider text-base">{"★".repeat(r.rating)}</div>
+              <p className="text-sm text-white/90 leading-relaxed italic">"{r.text}"</p>
+              <div className="mt-auto pt-2 border-t border-white/10">
+                <p className="font-bold text-sm">{r.name}</p>
+                <p className="text-xs text-white/60">{r.origin} · {r.date}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -444,6 +508,21 @@ function Pricing() {
 
 function Gallery({ gallery }: { gallery: string[] }) {
   const tr = useTr()
+  const [idx, setIdx] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const len = gallery.length
+
+  useEffect(() => {
+    if (len < 2 || paused) return
+    const id = setInterval(() => setIdx((i) => (i + 1) % len), 4000)
+    return () => clearInterval(id)
+  }, [len, paused])
+
+  const prev = () => setIdx((i) => (i - 1 + len) % len)
+  const next = () => setIdx((i) => (i + 1) % len)
+
+  if (len === 0) return null
+
   return (
     <section id="galeria" className="py-20 bg-[#F1EBDD] dark:bg-[#1A251D]">
       <div className="max-w-6xl mx-auto px-6">
@@ -453,12 +532,31 @@ function Gallery({ gallery }: { gallery: string[] }) {
           </p>
           <h2 className="text-3xl md:text-4xl mt-3" style={{ fontFamily: "'Fraunces', serif" }}>{tr("Conoce tu próximo hogar", "Meet your next home")}</h2>
         </div>
-        <div className="columns-2 md:columns-3 gap-4">
-          {gallery.map((src) => (
-            <figure key={src} className="break-inside-avoid mb-4 rounded-xl overflow-hidden shadow-lg group relative">
-              <img src={src} alt="" className="w-full object-cover group-hover:scale-105 transition duration-500" />
-            </figure>
-          ))}
+        <div className="relative max-w-5xl mx-auto" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+          <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-xl">
+            {gallery.map((src, i) => (
+              <div key={src} className={`absolute inset-0 transition-opacity duration-700 ${i === idx ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+
+          {len > 1 && (
+            <>
+              <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-ink dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-black transition shadow-md text-lg">
+                ‹
+              </button>
+              <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-ink dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-black transition shadow-md text-lg">
+                ›
+              </button>
+              <div className="flex justify-center gap-2 mt-4">
+                {gallery.map((_, i) => (
+                  <button key={i} onClick={() => setIdx(i)}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${i === idx ? "w-8 bg-verde" : "w-2.5 bg-ink/20 dark:bg-white/30"}`} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
