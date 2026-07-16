@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext"
 import { I18nProvider, useI18n } from "@/context/I18nContext"
 import { StrictMode, useEffect } from "react"
 import { createRoot } from "react-dom/client"
-import { TanStackRouterDevtools } from "@tanstack/router-devtools"
+
 import { LayoutDashboard, CalendarDays, Users, DoorOpen, Building2, LogOut, Menu, Shield, PenLine, UserCog, CalendarRange, Settings, ClipboardList, FileText } from "lucide-react"
 import { useState } from "react"
 import client from "@/api/client"
@@ -60,7 +60,6 @@ function PublicLayout() {
     <>
       <PaletteSync />
       <Outlet />
-      <TanStackRouterDevtools />
     </>
   )
 }
@@ -101,8 +100,8 @@ function AdminLayout() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-ink text-white transform transition-transform lg:relative lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+    <div className="flex h-screen bg-wall">
+      <aside className={`max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 w-64 bg-ink text-white transform transition-transform overflow-y-auto lg:relative lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-6 border-b border-white/10">
           <h1 className="font-serif text-xl font-bold">B&B Medellín</h1>
           <p className="text-sm text-white/60 mt-1">{user?.username}</p>

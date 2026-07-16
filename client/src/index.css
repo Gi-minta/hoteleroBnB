@@ -88,6 +88,10 @@ body {
   background-color: var(--color-dark-surface);
 }
 
+.dark .bg-wall {
+  background-color: var(--color-dark-bg);
+}
+
 .dark .border-\[--color-1B2E22\]\/10,
 .dark .border-\[--color-1B2E22\]\/5 {
   border-color: var(--color-dark-border);
