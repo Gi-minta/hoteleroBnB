@@ -2,12 +2,13 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import client from "@/api/client"
 import { UserPlus, Users } from "lucide-react"
+import type { Role } from "@/types"
 
 interface AppUser {
   id: number
   username: string
   email: string
-  role: string
+  role: { id: number; nombre: string }
   createdAt: string
 }
 
@@ -21,10 +22,20 @@ function useUsers() {
   })
 }
 
+function useRoles() {
+  return useQuery<Role[]>({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const { data } = await client.get("/auth/roles")
+      return data
+    },
+  })
+}
+
 function useRegisterUser() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (u: { username: string; email: string; password: string }) => {
+    mutationFn: async (u: { username: string; email: string; password: string; roleId: number | null }) => {
       const { data } = await client.post("/auth/register", u)
       return data
     },
@@ -42,6 +53,7 @@ function useDeleteUser() {
 
 export default function UsersPage() {
   const { data: users, isLoading } = useUsers()
+  const { data: roles } = useRoles()
   const register = useRegisterUser()
   const remove = useDeleteUser()
 
@@ -49,16 +61,18 @@ export default function UsersPage() {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [roleId, setRoleId] = useState<number | null>(null)
   const [error, setError] = useState("")
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     try {
-      await register.mutateAsync({ username, email, password })
+      await register.mutateAsync({ username, email, password, roleId })
       setUsername("")
       setEmail("")
       setPassword("")
+      setRoleId(null)
       setShowForm(false)
     } catch (err: any) {
       setError(err.response?.data?.error || "Error al registrar")
@@ -79,7 +93,7 @@ export default function UsersPage() {
         <form onSubmit={handleRegister} className="bg-white rounded-xl border border-ink/5 p-6 mb-6">
           <h3 className="font-bold mb-4">Registrar nuevo usuario</h3>
           {error && <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4">{error}</div>}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="text-xs font-medium text-ink-soft block mb-1">Usuario</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} required
@@ -94,6 +108,16 @@ export default function UsersPage() {
               <label className="text-xs font-medium text-ink-soft block mb-1">Contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                 className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm" placeholder="••••••" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-ink-soft block mb-1">Rol</label>
+              <select value={roleId ?? ""} onChange={(e) => setRoleId(e.target.value ? Number(e.target.value) : null)}
+                className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm">
+                <option value="">Por defecto (recepcionista)</option>
+                {roles?.map((r) => (
+                  <option key={r.id} value={r.id}>{r.nombre}</option>
+                ))}
+              </select>
             </div>
           </div>
           <button type="submit" disabled={register.isPending}
@@ -122,7 +146,7 @@ export default function UsersPage() {
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium">{u.username}</td>
                   <td className="px-4 py-3 text-ink-soft">{u.email}</td>
-                  <td className="px-4 py-3"><span className="text-xs bg-verde/10 text-verde px-2 py-1 rounded-full font-medium">{u.role}</span></td>
+                  <td className="px-4 py-3"><span className="text-xs bg-verde/10 text-verde px-2 py-1 rounded-full font-medium">{u.role.nombre}</span></td>
                   <td className="px-4 py-3 text-ink-soft">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => { if (confirm("¿Eliminar usuario?")) remove.mutate(u.id) }}

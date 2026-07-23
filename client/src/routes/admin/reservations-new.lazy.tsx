@@ -45,6 +45,8 @@ export default function NewReservationPage() {
   const [notas, setNotas] = useState("")
   const [origen, setOrigen] = useState("")
   const [numPersonas, setNumPersonas] = useState(1)
+  const [checkInTime, setCheckInTime] = useState("15:00")
+  const [checkOutTime, setCheckOutTime] = useState("12:00")
   const [acompanantes, setAcompanantes] = useState<{ nombre: string; tipoDoc: string; documento: string; permiso: boolean }[]>([])
   const [autorizaInfo, setAutorizaInfo] = useState(false)
 
@@ -142,11 +144,14 @@ export default function NewReservationPage() {
         guestId,
         checkInDate: checkIn,
         checkOutDate: checkOut,
+        checkInTime,
+        checkOutTime,
+        numPersonas,
         rooms: selectedRooms,
         responsablePagoId,
         totalAmount,
         notas: JSON.stringify({
-          profesion, origen, numPersonas, autorizaInfo,
+          profesion, origen, autorizaInfo,
           acompanantes, fotosDocs, docReglamento, docEscnna, docContrato,
           firma: firma ? "Recolectada" : "No",
           notas,
@@ -337,6 +342,16 @@ export default function NewReservationPage() {
                 <input type="number" min={1} value={numPersonas} onChange={(e) => setNumPersonas(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-verde/30" />
               </div>
+              <div>
+                <label className="text-xs font-medium text-ink-soft block mb-1">Hora de check-in</label>
+                <input type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-verde/30" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-ink-soft block mb-1">Hora de check-out</label>
+                <input type="time" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-verde/30" />
+              </div>
             </div>
 
             {numPersonas > 1 && (
@@ -465,7 +480,7 @@ export default function NewReservationPage() {
               <div className="flex justify-between"><span className="text-ink-soft">Huésped:</span><span className="font-medium">{nombre} {apellido}</span></div>
               <div className="flex justify-between"><span className="text-ink-soft">Documento:</span><span>{tipoDocumento} {documento}</span></div>
               <div className="flex justify-between"><span className="text-ink-soft">Email / Tel:</span><span>{email} / {telefono}</span></div>
-              <div className="flex justify-between"><span className="text-ink-soft">Check-in / out:</span><span>{new Date(checkIn).toLocaleDateString()} → {new Date(checkOut).toLocaleDateString()}</span></div>
+              <div className="flex justify-between"><span className="text-ink-soft">Check-in / out:</span><span>{new Date(checkIn).toLocaleDateString()} {checkInTime} → {new Date(checkOut).toLocaleDateString()} {checkOutTime}</span></div>
               <div className="flex justify-between"><span className="text-ink-soft">Habitaciones:</span><span>{selectedRooms.length}</span></div>
               <div className="flex justify-between"><span className="text-ink-soft">Personas:</span><span>{numPersonas}</span></div>
               <div className="flex justify-between"><span className="text-ink-soft">Total:</span><span className="font-bold text-lg">${totalAmount.toLocaleString()}</span></div>

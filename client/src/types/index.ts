@@ -1,8 +1,22 @@
+export interface Role {
+  id: number
+  nombre: string
+  descripcion: string
+  createdAt: string
+}
+
 export interface User {
   id: number
   username: string
   email: string
   role: string
+}
+
+export interface Configuracion {
+  id: number
+  clave: string
+  valor: string
+  updatedAt: string
 }
 
 export interface Guest {
@@ -47,9 +61,13 @@ export interface Reservation {
   responsablePagoId: number | null
   checkInDate: string
   checkOutDate: string
+  checkInTime: string
+  checkOutTime: string
+  numPersonas: number
   status: string
   totalAmount: number
   notas: string
+  googleEventId: string | null
   createdDate: string
   guest: Guest
   responsablePago: ResponsablePago | null

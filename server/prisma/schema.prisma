@@ -12,9 +12,25 @@ model User {
   username  String    @unique
   email     String    @unique
   password  String
-  role      String    @default("admin")
+  roleId    Int
+  role      Role      @relation(fields: [roleId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String   @default("")
+  createdAt   DateTime @default(now())
+  users       User[]
+}
+
+model Configuracion {
+  id        Int      @id @default(autoincrement())
+  clave     String   @unique
+  valor     String   @default("")
+  updatedAt DateTime @updatedAt
 }
 
 model Guest {
@@ -63,9 +79,13 @@ model Reservation {
   responsablePagoId Int?
   checkInDate       DateTime
   checkOutDate      DateTime
+  checkInTime       String            @default("15:00")
+  checkOutTime      String            @default("12:00")
+  numPersonas       Int               @default(1)
   status            String            @default("Pendiente")
   totalAmount       Float
   notas             String            @default("")
+  googleEventId     String?
   createdDate       DateTime          @default(now())
   guest             Guest             @relation(fields: [guestId], references: [id])
   responsablePago   ResponsablePago?  @relation(fields: [responsablePagoId], references: [id])

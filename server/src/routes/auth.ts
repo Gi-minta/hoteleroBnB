@@ -11,7 +11,7 @@ auth.post("/login", async (c) => {
     return c.json({ error: "Usuario y contraseña requeridos" }, 400)
   }
 
-  const user = await prisma.user.findUnique({ where: { username } })
+  const user = await prisma.user.findUnique({ where: { username }, include: { role: true } })
   if (!user) {
     return c.json({ error: "Credenciales inválidas" }, 401)
   }
@@ -21,19 +21,24 @@ auth.post("/login", async (c) => {
     return c.json({ error: "Credenciales inválidas" }, 401)
   }
 
-  const token = signToken({ id: user.id, username: user.username, role: user.role })
+  const token = signToken({ id: user.id, username: user.username, role: user.role.nombre })
   return c.json({
     token,
-    user: { id: user.id, username: user.username, email: user.email, role: user.role },
+    user: { id: user.id, username: user.username, email: user.email, role: user.role.nombre },
   })
 })
 
 auth.get("/users", async (c) => {
   const users = await prisma.user.findMany({
-    select: { id: true, username: true, email: true, role: true, createdAt: true },
+    select: { id: true, username: true, email: true, createdAt: true, role: { select: { id: true, nombre: true } } },
     orderBy: { createdAt: "desc" },
   })
   return c.json(users)
+})
+
+auth.get("/roles", authMiddleware, async (c) => {
+  const roles = await prisma.role.findMany({ orderBy: { nombre: "asc" } })
+  return c.json(roles)
 })
 
 auth.delete("/users/:id", async (c) => {
@@ -81,14 +86,14 @@ auth.put("/username", authMiddleware, async (c) => {
   const updated = await prisma.user.update({
     where: { id },
     data: { username: newUsername },
-    select: { id: true, username: true, email: true, role: true },
+    select: { id: true, username: true, email: true, role: { select: { nombre: true } } },
   })
 
   return c.json(updated)
 })
 
 auth.post("/register", async (c) => {
-  const { username, email, password } = await c.req.json()
+  const { username, email, password, roleId } = await c.req.json()
   if (!username || !email || !password) {
     return c.json({ error: "Todos los campos son requeridos" }, 400)
   }
@@ -100,15 +105,21 @@ auth.post("/register", async (c) => {
     return c.json({ error: "Usuario o email ya existe" }, 409)
   }
 
+  const role = roleId
+    ? await prisma.role.findUnique({ where: { id: Number(roleId) } })
+    : await prisma.role.findUnique({ where: { nombre: "recepcionista" } })
+  if (!role) return c.json({ error: "Rol inválido" }, 400)
+
   const hashed = await bcrypt.hash(password, 10)
   const user = await prisma.user.create({
-    data: { username, email, password: hashed },
+    data: { username, email, password: hashed, roleId: role.id },
+    include: { role: true },
   })
 
-  const token = signToken({ id: user.id, username: user.username, role: user.role })
+  const token = signToken({ id: user.id, username: user.username, role: user.role.nombre })
   return c.json({
     token,
-    user: { id: user.id, username: user.username, email: user.email, role: user.role },
+    user: { id: user.id, username: user.username, email: user.email, role: user.role.nombre },
   }, 201)
 })
 

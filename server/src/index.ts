@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { serve } from "@hono/node-server"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { Hono } from "hono"
@@ -14,6 +15,7 @@ import escnna from "./routes/escnna.js"
 import photos from "./routes/photos.js"
 import landing from "./routes/landing.js"
 import registros from "./routes/registros.js"
+import config from "./routes/config.js"
 
 const app = new Hono()
 
@@ -21,7 +23,7 @@ app.get("/", (c) => c.json({
   nombre: "Hotelero API",
   version: "1.0.0",
   docs: "/scalar/v1",
-  endpoints: ["/api/auth", "/api/guests", "/api/rooms", "/api/reservations", "/api/responsables", "/api/payments", "/api/dashboard", "/api/uploads", "/api/escnna", "/api/photos", "/api/landing", "/api/registros", "/api/health"],
+  endpoints: ["/api/auth", "/api/guests", "/api/rooms", "/api/reservations", "/api/responsables", "/api/payments", "/api/dashboard", "/api/uploads", "/api/escnna", "/api/photos", "/api/landing", "/api/registros", "/api/config", "/api/health"],
 }))
 
 app.use("/api/*", cors({ origin: ["http://localhost:4200", "http://localhost:5173"], credentials: true }))
@@ -40,6 +42,7 @@ app.route("/api/escnna", escnna)
 app.route("/api/photos", photos)
 app.route("/api/landing", landing)
 app.route("/api/registros", registros)
+app.route("/api/config", config)
 
 app.get("/api/health", (c) => c.json({ status: "ok", time: new Date().toISOString() }))
 

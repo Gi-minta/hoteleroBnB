@@ -1,15 +1,35 @@
+import "dotenv/config"
 import prisma from "./lib/prisma.js"
 import bcrypt from "bcryptjs"
 
 async function seed() {
   console.log("Seeding database...")
 
+  const roles = [
+    { nombre: "admin", descripcion: "Acceso total al panel de administración" },
+    { nombre: "recepcionista", descripcion: "Gestión de reservas, huéspedes y check-in/check-out" },
+  ]
+  for (const r of roles) {
+    await prisma.role.upsert({ where: { nombre: r.nombre }, update: {}, create: r })
+  }
+  const adminRole = await prisma.role.findUniqueOrThrow({ where: { nombre: "admin" } })
+
   const adminPassword = await bcrypt.hash("admin123", 10)
   await prisma.user.upsert({
     where: { username: "admin" },
     update: {},
-    create: { username: "admin", email: "admin@hotelero.com", password: adminPassword, role: "admin" },
+    create: { username: "admin", email: "admin@hotelero.com", password: adminPassword, roleId: adminRole.id },
   })
+
+  const configuracion = [
+    { clave: "hotelName", valor: "B&B Medellín" },
+    { clave: "checkInDefaultTime", valor: "15:00" },
+    { clave: "checkOutDefaultTime", valor: "12:00" },
+    { clave: "googleSyncEnabled", valor: "false" },
+  ]
+  for (const cfg of configuracion) {
+    await prisma.configuracion.upsert({ where: { clave: cfg.clave }, update: {}, create: cfg })
+  }
 
   const roomTypes = [
     { nombre: "Ejecutiva", descripcion: "Habitación ejecutiva para viajeros de negocios", precioBase: 120000, capacidadMaxima: 2 },

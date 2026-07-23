@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "@/context/AuthContext"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import client from "@/api/client"
-import { Save, Palette, User, Lock, RotateCcw } from "lucide-react"
+import { Save, Palette, User, Lock, RotateCcw, CalendarClock } from "lucide-react"
 import { PALETTE_GROUPS, PALETTE_KEYS, getDefaultPalette, applyPalette, paletteFromLandingContent, type PaletteColors } from "@/lib/palette"
+import type { Configuracion } from "@/types"
+
+function useConfiguracion() {
+  return useQuery<Configuracion[]>({
+    queryKey: ["configuracion"],
+    queryFn: async () => {
+      const { data } = await client.get("/config")
+      return data
+    },
+  })
+}
 
 export default function SettingsPage() {
   const { user } = useAuth()
+  const qc = useQueryClient()
   const { data: paletteData } = useQuery({
     queryKey: ["palette"],
     queryFn: async () => {
@@ -14,16 +26,32 @@ export default function SettingsPage() {
       return data as { section: string; key: string; value: string }[]
     },
   })
+  const { data: configData } = useConfiguracion()
 
   const [colors, setColors] = useState<PaletteColors>(getDefaultPalette())
   const [newUsername, setNewUsername] = useState("")
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [msg, setMsg] = useState("")
+  const [config, setConfig] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (user) setNewUsername(user.username)
   }, [user])
+
+  useEffect(() => {
+    if (configData) {
+      setConfig(Object.fromEntries(configData.map((c) => [c.clave, c.valor])))
+    }
+  }, [configData])
+
+  const saveConfig = useMutation({
+    mutationFn: async ({ clave, valor }: { clave: string; valor: string }) => {
+      await client.put(`/config/admin/${clave}`, { valor })
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["configuracion"] }); setMsg("Configuración guardada") },
+    onError: (err: any) => setMsg(err.response?.data?.error || "Error"),
+  })
 
   useEffect(() => {
     if (paletteData) {
@@ -133,6 +161,62 @@ export default function SettingsPage() {
             <Save size={14} /> {savePalette.isPending ? "Guardando..." : "Guardar paleta"}
           </button>
           <p className="text-xs text-ink-soft mt-2">Los colores se aplican en tiempo real. Los cambios persisten al recargar.</p>
+        </div>
+
+        {/* Configuración general / Google Calendar */}
+        <div className="bg-white rounded-xl border border-ink/5 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <CalendarClock size={20} className="text-verde" />
+            <h2 className="font-bold">Configuración general</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-medium text-ink-soft block mb-1">Nombre del hostal</label>
+              <div className="flex items-center gap-3">
+                <input value={config.hotelName ?? ""} onChange={(e) => setConfig({ ...config, hotelName: e.target.value })}
+                  className="flex-1 px-3 py-2 border border-ink/10 rounded-lg text-sm" />
+                <button onClick={() => saveConfig.mutate({ clave: "hotelName", valor: config.hotelName ?? "" })} disabled={saveConfig.isPending}
+                  className="px-4 py-2 bg-verde text-white rounded-lg text-sm font-bold hover:bg-verde-2 transition disabled:opacity-50">Guardar</button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-medium text-ink-soft block mb-1">Hora check-in por defecto</label>
+                <div className="flex items-center gap-2">
+                  <input type="time" value={config.checkInDefaultTime ?? "15:00"}
+                    onChange={(e) => setConfig({ ...config, checkInDefaultTime: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-ink/10 rounded-lg text-sm" />
+                  <button onClick={() => saveConfig.mutate({ clave: "checkInDefaultTime", valor: config.checkInDefaultTime ?? "15:00" })} disabled={saveConfig.isPending}
+                    className="px-3 py-2 bg-verde text-white rounded-lg text-xs font-bold hover:bg-verde-2 transition disabled:opacity-50">✓</button>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-ink-soft block mb-1">Hora check-out por defecto</label>
+                <div className="flex items-center gap-2">
+                  <input type="time" value={config.checkOutDefaultTime ?? "12:00"}
+                    onChange={(e) => setConfig({ ...config, checkOutDefaultTime: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-ink/10 rounded-lg text-sm" />
+                  <button onClick={() => saveConfig.mutate({ clave: "checkOutDefaultTime", valor: config.checkOutDefaultTime ?? "12:00" })} disabled={saveConfig.isPending}
+                    className="px-3 py-2 bg-verde text-white rounded-lg text-xs font-bold hover:bg-verde-2 transition disabled:opacity-50">✓</button>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-ink/5">
+              <div>
+                <p className="text-sm font-medium">Sincronizar reservas con Google Calendar</p>
+                <p className="text-xs text-ink-soft">Requiere credenciales de la cuenta de servicio configuradas en el servidor (variables de entorno)</p>
+              </div>
+              <button
+                onClick={() => {
+                  const next = config.googleSyncEnabled === "true" ? "false" : "true"
+                  setConfig({ ...config, googleSyncEnabled: next })
+                  saveConfig.mutate({ clave: "googleSyncEnabled", valor: next })
+                }}
+                className={`relative w-11 h-6 rounded-full transition ${config.googleSyncEnabled === "true" ? "bg-verde" : "bg-gray-300"}`}>
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${config.googleSyncEnabled === "true" ? "translate-x-5" : ""}`} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Cambiar usuario */}
