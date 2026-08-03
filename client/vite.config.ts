@@ -7,8 +7,11 @@ import { defineConfig } from "vite"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [react(), tailwindcss()],
+  // En build usamos el subdirectorio de GitHub Pages (configurable con VITE_BASE);
+  // en dev/preview siempre "/" para no romper el servidor local.
+  base: command === "build" ? (process.env.VITE_BASE ?? "/hoteleroBnB/") : "/",
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },
   },
@@ -26,4 +29,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

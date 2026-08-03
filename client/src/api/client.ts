@@ -1,6 +1,9 @@
 import axios from "axios"
+import { hardRedirect } from "@/lib/paths"
 
-const client = axios.create({ baseURL: "/api" })
+// En dev VITE_API_URL queda vacía → "/api" (proxy de Vite). En GitHub Pages se
+// define en el build para apuntar al backend público.
+const client = axios.create({ baseURL: import.meta.env.VITE_API_URL || "/api" })
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem("token")
@@ -14,7 +17,7 @@ client.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem("token")
       localStorage.removeItem("user")
-      window.location.href = "/login"
+      hardRedirect("/login")
     }
     return Promise.reject(err)
   }

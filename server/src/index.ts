@@ -26,7 +26,17 @@ app.get("/", (c) => c.json({
   endpoints: ["/api/auth", "/api/guests", "/api/rooms", "/api/reservations", "/api/responsables", "/api/payments", "/api/dashboard", "/api/uploads", "/api/escnna", "/api/photos", "/api/landing", "/api/registros", "/api/config", "/api/health"],
 }))
 
-app.use("/api/*", cors({ origin: ["http://localhost:4200", "http://localhost:5173"], credentials: true }))
+// Orígenes permitidos para CORS: los de desarrollo local, el sitio publicado en
+// GitHub Pages, y cualquier extra definido en CORS_ORIGINS (lista separada por
+// comas) para no tener que tocar el código al cambiar de dominio.
+const corsOrigins = [
+  "http://localhost:4200",
+  "http://localhost:5173",
+  "https://gi-minta.github.io",
+  ...(process.env.CORS_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) ?? []),
+]
+
+app.use("/api/*", cors({ origin: corsOrigins, credentials: true }))
 
 app.use("/uploads/*", serveStatic({ root: "./" }))
 

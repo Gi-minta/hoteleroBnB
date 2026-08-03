@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 import type { User } from "@/types"
 import client from "@/api/client"
+import { hardRedirect } from "@/lib/paths"
 
 interface AuthContextType {
   user: User | null
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user")
     setToken(null)
     setUser(null)
-    window.location.href = "/"
+    hardRedirect("/")
   }, [])
 
   return (

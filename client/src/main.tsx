@@ -9,6 +9,7 @@ import { LayoutDashboard, CalendarDays, Users, DoorOpen, Building2, LogOut, Menu
 import { useState } from "react"
 import client from "@/api/client"
 import { applyPalette, applyCachedPalette, paletteFromLandingContent } from "@/lib/palette"
+import { BASE } from "@/lib/paths"
 import "./index.css"
 
 import HomePage from "./routes/index.lazy"
@@ -187,6 +188,9 @@ const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, sta
 
 const router = createRouter({
   routeTree,
+  // Sin basepath, los <Link> del panel admin apuntan fuera del subdirectorio de
+  // GitHub Pages. En dev BASE es "" → undefined (comportamiento por defecto).
+  basepath: BASE || undefined,
   defaultPreload: "intent",
   context: { auth: undefined },
 })

@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext"
 import { useState, useEffect, type FormEvent } from "react"
 import { LogIn, UserPlus } from "lucide-react"
+import { withBase, hardRedirect } from "@/lib/paths"
 
 export default function LoginPage() {
   const { login, register, isAuthenticated } = useAuth()
@@ -20,7 +21,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (isAuthenticated) window.location.href = "/admin"
+    if (isAuthenticated) hardRedirect("/admin")
   }, [isAuthenticated])
 
   const handleLogin = async (e: FormEvent) => {
@@ -29,7 +30,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(username, password)
-      window.location.href = "/admin"
+      hardRedirect("/admin")
     } catch (err: any) {
       setError(err.response?.data?.error || "Error al iniciar sesión")
     } finally {
@@ -51,7 +52,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await register(regUsername, regEmail, regPassword)
-      window.location.href = "/admin"
+      hardRedirect("/admin")
     } catch (err: any) {
       setError(err.response?.data?.error || "Error al registrar usuario")
     } finally {
@@ -140,7 +141,7 @@ export default function LoginPage() {
         )}
 
         <div className="text-center mt-5">
-          <a href="/" className="text-xs text-ink-soft hover:text-verde transition">← Volver al sitio</a>
+          <a href={withBase("/")} className="text-xs text-ink-soft hover:text-verde transition">← Volver al sitio</a>
         </div>
       </div>
     </div>

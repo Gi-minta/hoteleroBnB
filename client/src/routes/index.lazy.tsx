@@ -4,6 +4,7 @@ import { useLandingContent, useLandingGallery } from "@/api/queries/useLanding"
 import { useCreatePreRegistro } from "@/api/queries/usePreRegistros"
 import RegistroHuespedModal from "@/components/RegistroHuespedModal"
 import AvailabilityModal from "@/components/AvailabilityModal"
+import { withBase } from "@/lib/paths"
 
 const whatsapp = "https://wa.me/573004446421"
 
@@ -12,7 +13,7 @@ const DEFAULT_GALLERY = [
   "/images/terraza.jpg", "/images/balcon.jpg", "/images/vista-balcon.jpg", "/images/recepcion.jpg",
   "/images/bano1.jpg", "/images/bano2.jpg", "/images/bano3.jpg", "/images/escalas1.jpg",
   "/images/bnb-brand.jpg", "/images/feria-flores.png", "/images/apt-ejecutivo2.jpg", "/images/apt-familiar-cocina.jpg",
-]
+].map(withBase)
 
 // Traductor en línea: el texto en español se mantiene igual al original;
 // el segundo argumento es la traducción al inglés que se muestra con el toggle ES/EN.
@@ -116,7 +117,7 @@ function Navbar({ onReservar }: { onReservar: () => void }) {
               {l}
             </a>
           ))}
-          <a href="/login" className="ml-2 px-4 py-2 bg-fucsia text-white rounded-full text-xs font-bold uppercase tracking-wide hover:bg-fucsia transition shadow-md">
+          <a href={withBase("/login")} className="ml-2 px-4 py-2 bg-fucsia text-white rounded-full text-xs font-bold uppercase tracking-wide hover:bg-fucsia transition shadow-md">
             Login
           </a>
         </div>
@@ -143,7 +144,7 @@ function Navbar({ onReservar }: { onReservar: () => void }) {
           {links.map((l, i) => (
             <a key={ids[i]} href={`#${ids[i]}`} className="block text-sm font-semibold" onClick={() => setMenuOpen(false)}>{l}</a>
           ))}
-          <a href="/login" className="block text-sm font-bold text-fucsia">Login</a>
+          <a href={withBase("/login")} className="block text-sm font-bold text-fucsia">Login</a>
           <button onClick={() => { setMenuOpen(false); onReservar() }} className="block text-sm font-bold text-verde text-left">{tr("Reservar", "Book now")}</button>
           <a href={whatsapp} target="_blank" rel="noopener" className="block text-sm font-bold text-ink-soft dark:text-[#A7B6AB]">{tr("Reservar por WhatsApp", "Book via WhatsApp")}</a>
         </div>
@@ -156,7 +157,7 @@ function Hero({ t }: { t: Translate }) {
   const tr = useTr()
   return (
     <section id="inicio" className="relative min-h-[130vh] flex items-end text-white overflow-hidden">
-      <img src="/images/fachada2.png" alt="Fachada B&B Medellín" className="absolute inset-0 w-full h-full object-cover object-top z-0" />
+      <img src={withBase("/images/fachada2.png")} alt="Fachada B&B Medellín" className="absolute inset-0 w-full h-full object-cover object-top z-0" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/60 to-black/90 z-10" />
       <div className="relative z-20 max-w-6xl mx-auto px-6 pb-20 w-full">
         <p className="text-xs tracking-widest uppercase text-mostaza flex items-center gap-2 mb-4 font-bold" style={{ fontFamily: "'Space Mono', monospace" }}>
@@ -232,8 +233,8 @@ function ApartmentCard({ images, name, desc, tags, eyebrow }: { images: string[]
 function Apartments({ t }: { t: Translate }) {
   const tr = useTr()
   const roomCards = [
-    { eyebrow: tr("Apartamento 01", "Apartment 01"), name: tr("Apartamento Ejecutivo", "Executive Apartment"), desc: tr("Compacto y funcional, perfecto para viajeros de negocios o parejas. Cocina equipada y salón con televisor, wifi, cafe y aromatica de cortesia.", "Compact and functional, perfect for business travelers or couples. Equipped kitchen and private living room."), tags: [tr("1 habitación", "1 bedroom"), tr("2 personas", "2 guests"), tr("Cocina equipada", "Equipped kitchen")], images: ["/images/apt-ejecutivo.jpg", "/images/apt-ejecutivo-sala.jpg", "/images/apt-ejecutivo2.jpg"] },
-    { eyebrow: tr("Apartamento 02", "Apartment 02"), name: tr("Apartamento Familiar", "Family Apartment"), desc: tr("Amplio y luminoso, con dos habitaciones y cocina equipada, patio con zona de ropas, wifi, cafe y aromatica de cortesia. Ideal para familias o grupos pequeños.", "Spacious and bright, with two bedrooms and an island kitchen. Ideal for families or small groups."), tags: [tr("2 habitaciones", "2 bedrooms"), tr("6 personas", "6 guests"), tr("Cocina equipada", "Equipped kitchen")], images: ["/images/apt-familiar1.jpg", "/images/apt-familiar2.jpg", "/images/apt-familiar-cocina.jpg"] },
+    { eyebrow: tr("Apartamento 01", "Apartment 01"), name: tr("Apartamento Ejecutivo", "Executive Apartment"), desc: tr("Compacto y funcional, perfecto para viajeros de negocios o parejas. Cocina equipada y salón con televisor, wifi, cafe y aromatica de cortesia.", "Compact and functional, perfect for business travelers or couples. Equipped kitchen and private living room."), tags: [tr("1 habitación", "1 bedroom"), tr("2 personas", "2 guests"), tr("Cocina equipada", "Equipped kitchen")], images: ["/images/apt-ejecutivo.jpg", "/images/apt-ejecutivo-sala.jpg", "/images/apt-ejecutivo2.jpg"].map(withBase) },
+    { eyebrow: tr("Apartamento 02", "Apartment 02"), name: tr("Apartamento Familiar", "Family Apartment"), desc: tr("Amplio y luminoso, con dos habitaciones y cocina equipada, patio con zona de ropas, wifi, cafe y aromatica de cortesia. Ideal para familias o grupos pequeños.", "Spacious and bright, with two bedrooms and an island kitchen. Ideal for families or small groups."), tags: [tr("2 habitaciones", "2 bedrooms"), tr("6 personas", "6 guests"), tr("Cocina equipada", "Equipped kitchen")], images: ["/images/apt-familiar1.jpg", "/images/apt-familiar2.jpg", "/images/apt-familiar-cocina.jpg"].map(withBase) },
   ]
 
   return (
@@ -305,7 +306,7 @@ function Location() {
     { name: "Universidad Pontificia Bolivariana", time: "0.5 km", icon: "🎓", desc: tr("El barrio Conquistadores se desarrolló alrededor de la Universidad Pontificia Bolivariana.", "The Conquistadores neighborhood grew up around Universidad Pontificia Bolivariana."), img: "/images/upb.jpg" },
     { name: tr("Centro de Medellín", "Downtown Medellín"), time: "4.5 km", icon: "🏛️", desc: tr("Centro administrativo y cultural de la ciudad.", "The city's administrative and cultural center."), img: "/images/centro-medellin.jpg" },
     { name: "Plaza Botero", time: "4.5 km", icon: "🎓", desc: tr("Museo de Antioquia, Parque Berrio", "Antioquia Museum, Parque Berrío"), img: "/images/plaza-botero.png" },
-  ]
+  ].map((p) => ({ ...p, img: withBase(p.img) }))
   return (
     <section id="alrededores" className="py-20 bg-[#F1EBDD] dark:bg-[#1A251D]">
       <div className="max-w-6xl mx-auto px-6">
@@ -743,7 +744,7 @@ function Footer() {
             <h5 className="text-xs tracking-widest uppercase text-mostaza mb-4" style={{ fontFamily: "'Space Mono', monospace" }}>{tr("Enlaces", "Links")}</h5>
             <ul className="text-sm space-y-2">
               <li><a href="#habitaciones" className="hover:text-mostaza transition">{tr("Apartamentos", "Apartments")}</a></li>
-              <li><a href="/login" className="hover:text-mostaza transition">Admin</a></li>
+              <li><a href={withBase("/login")} className="hover:text-mostaza transition">Admin</a></li>
               <li><a href="#faq" className="hover:text-mostaza transition">FAQ</a></li>
             </ul>
           </div>
