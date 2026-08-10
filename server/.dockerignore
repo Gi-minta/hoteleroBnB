@@ -1,0 +1,10 @@
+node_modules
+dist
+*.log
+.env
+.env.*
+# Datos locales que no deben entrar a la imagen (van en volúmenes).
+data
+uploads
+*.db
+*.db-journal
