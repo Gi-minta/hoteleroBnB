@@ -4,8 +4,9 @@ name: CI
 # despliega nada (de eso se encarga deploy-pages.yml en main).
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
