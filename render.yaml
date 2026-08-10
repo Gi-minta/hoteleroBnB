@@ -1,0 +1,30 @@
+# Blueprint de Render para el backend (Hono + Prisma + SQLite).
+# Uso: en Render → New → Blueprint → conecta este repo. Render lee este archivo,
+# crea el servicio y redepliega en cada push a main. El disco persiste la DB.
+services:
+  - type: web
+    name: hotelero-server
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    plan: starter          # el plan con disco persistente
+    region: oregon
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 3001
+      # La DB va en el disco (NO en /app/uploads, que se sirve públicamente).
+      - key: DATABASE_URL
+        value: file:/data/hotelero.db
+      - key: CORS_ORIGINS
+        value: https://gi-minta.github.io
+      # Se genera un secreto aleatorio la primera vez.
+      - key: JWT_SECRET
+        generateValue: true
+    disk:
+      name: hotelero-data
+      mountPath: /data
+      sizeGB: 1
+# ⚠️ Las fotos subidas (/app/uploads) NO están en el disco: se pierden en cada
+# redeploy. Para producción usa un segundo disco en /app/uploads o S3/R2.

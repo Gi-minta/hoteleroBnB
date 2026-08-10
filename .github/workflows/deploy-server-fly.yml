@@ -1,0 +1,41 @@
+name: Deploy server to Fly.io
+
+# Despliega el backend a Fly.io. Queda INERTE hasta que lo habilites, para no
+# fallar antes de configurar Fly:
+#   1. Crea la app y el volumen (una vez):
+#        cd server && fly launch --no-deploy
+#        fly volumes create hotelero_data --size 1 --region bog
+#        fly secrets set JWT_SECRET="un-secreto-fuerte"
+#   2. En GitHub: Settings → Secrets and variables → Actions
+#        - Secret  FLY_API_TOKEN  = (fly tokens create deploy)
+#        - Variable FLY_DEPLOY    = true
+#   Con FLY_DEPLOY=true, cada push a server/** despliega; también puedes usar
+#   "Run workflow" (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/deploy-server-fly.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # Inerte mientras no exista la variable de repo FLY_DEPLOY=true.
+    if: ${{ vars.FLY_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-server-fly
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        run: flyctl deploy --remote-only
+        working-directory: server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

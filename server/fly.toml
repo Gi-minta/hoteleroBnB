@@ -1,0 +1,49 @@
+# Configuración de Fly.io para el backend (Hono + Prisma + SQLite).
+# Uso (desde la carpeta server/):
+#   fly launch --no-deploy        # crea la app (elige un nombre único)
+#   fly volumes create hotelero_data --size 1 --region bog
+#   fly secrets set JWT_SECRET="un-secreto-fuerte"
+#   fly deploy
+#
+# Nota: cambia `app` por el nombre único que te asigne/elijas en Fly.
+app = "hotelero-server"
+primary_region = "bog"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3001"
+  # La DB va en el volumen persistente (NO dentro de /app/uploads, que se sirve
+  # públicamente en /uploads/*).
+  DATABASE_URL = "file:/data/hotelero.db"
+  CORS_ORIGINS = "https://gi-minta.github.io"
+  # JWT_SECRET NO va aquí: ponlo con `fly secrets set JWT_SECRET=...`
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/api/health"
+
+# Volumen persistente para la SQLite. Créalo una vez con:
+#   fly volumes create hotelero_data --size 1 --region bog
+[[mounts]]
+  source = "hotelero_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+# ⚠️ Las fotos subidas se guardan en /app/uploads y NO están en este volumen:
+# se pierden en cada redeploy. Para producción, monta un segundo volumen en
+# /app/uploads o usa almacenamiento de objetos (S3/R2).
