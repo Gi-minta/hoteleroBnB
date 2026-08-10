@@ -29,6 +29,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Habilita Pages y fija la fuente en "GitHub Actions" desde el propio
+      # workflow, para no depender de un cambio manual en Settings → Pages.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
