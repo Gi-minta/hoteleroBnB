@@ -1,0 +1,31 @@
+name: Seed admin (Fly.io)
+
+# Ejecuta el sembrado del admin en la máquina ya desplegada en Fly.
+# Manual (Run workflow). Requisitos previos:
+#   - App desplegada en Fly (workflow "Deploy server to Fly.io").
+#   - Secret FLY_API_TOKEN y variable FLY_DEPLOY=true (ya usados por el deploy).
+#   - Contraseña del admin como secret de Fly (no se pasa por Actions):
+#       fly secrets set ADMIN_USERNAME="admin" ADMIN_PASSWORD="una-fuerte"
+#   Debe haber una máquina corriendo (si usas scale-to-zero, despliega primero
+#   o haz `fly scale count 1`).
+on:
+  workflow_dispatch:
+
+jobs:
+  seed-admin:
+    if: ${{ vars.FLY_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Corre el seed compilado (dist/seed-admin.js) dentro de la máquina, que
+      # lee ADMIN_USERNAME/ADMIN_PASSWORD desde los secrets de Fly.
+      - name: Seed admin
+        run: flyctl ssh console --command "node dist/seed-admin.js"
+        working-directory: server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
